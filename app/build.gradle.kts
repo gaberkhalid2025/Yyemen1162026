@@ -128,3 +128,8 @@ tasks.register<Copy>("copyApkToMain") {
     into(rootDir)
 }
 
+tasks.register<Copy>("copyBuildOutputApkToMain") {
+    from(file("../.build-outputs/app-debug.apk"))
+    into(rootDir)
+}
+
