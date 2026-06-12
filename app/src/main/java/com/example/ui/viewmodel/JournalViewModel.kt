@@ -61,9 +61,7 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
     init {
         val database = AppDatabase.getDatabase(application)
         repository = JournalRepository(
-            database.journalDao(),
-            database.professionalDao(),
-            database.bookingSlotDao()
+            database.journalDao()
         )
         
         allEntries = repository.allEntries.stateIn(
@@ -84,13 +82,14 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
             initialValue = emptyList()
         )
 
-        // Prepopulate professionals with location coordinates if empty
+        // Prepopulate professionals on Firestore with unique resource IDs if collection is empty
         viewModelScope.launch {
             try {
                 val list = repository.allProfessionals.first()
                 if (list.isEmpty()) {
                     val initialList = listOf(
                         Professional(
+                            id = "1",
                             name = "Zen Master Ananda",
                             specialty = "Vipassana Meditation & Tibetan Sound Healing",
                             rating = 4.9f,
@@ -102,6 +101,7 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
                             contactEmail = "ananda@zenmind.ai"
                         ),
                         Professional(
+                            id = "2",
                             name = "Somi - Breathwork Guru",
                             specialty = "Pranayama & Active Energy Grounding",
                             rating = 4.8f,
@@ -113,6 +113,7 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
                             contactEmail = "somi@zenmind.ai"
                         ),
                         Professional(
+                            id = "3",
                             name = "Dr. David Malik",
                             specialty = "Somatic Clinical Mindfulness & Stress Reduction",
                             rating = 4.7f,
@@ -131,17 +132,17 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
             }
         }
 
-        // Prepopulate slots if empty
+        // Prepopulate booking slots on Firestore with unique resource IDs if empty
         viewModelScope.launch {
             try {
                 val list = repository.allSlots.first()
                 if (list.isEmpty()) {
                     val initialSlots = listOf(
-                        BookingSlot(date = "June 14", time = "09:00 AM", isBooked = false, isEnabled = true),
-                        BookingSlot(date = "June 14", time = "11:30 AM", isBooked = false, isEnabled = true),
-                        BookingSlot(date = "June 14", time = "02:00 PM", isBooked = false, isEnabled = true),
-                        BookingSlot(date = "June 15", time = "10:00 AM", isBooked = false, isEnabled = true),
-                        BookingSlot(date = "June 15", time = "03:30 PM", isBooked = false, isEnabled = true)
+                        BookingSlot(id = "slot_1", date = "June 14", time = "09:00 AM", isBooked = false, isEnabled = true),
+                        BookingSlot(id = "slot_2", date = "June 14", time = "11:30 AM", isBooked = false, isEnabled = true),
+                        BookingSlot(id = "slot_3", date = "June 14", time = "02:00 PM", isBooked = false, isEnabled = true),
+                        BookingSlot(id = "slot_4", date = "June 15", time = "10:00 AM", isBooked = false, isEnabled = true),
+                        BookingSlot(id = "slot_5", date = "June 15", time = "03:30 PM", isBooked = false, isEnabled = true)
                     )
                     for (slot in initialSlots) {
                         repository.insertSlot(slot)
@@ -197,7 +198,7 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun deleteBookingSlot(id: Int) {
+    fun deleteBookingSlot(id: String) {
         viewModelScope.launch {
             repository.deleteSlotById(id)
         }

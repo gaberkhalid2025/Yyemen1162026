@@ -640,7 +640,7 @@ fun GuidesTabContent(viewModel: JournalViewModel) {
     val routerRule by viewModel.notificationRoutingRule.collectAsStateWithLifecycle()
 
     // Internal selection states
-    var selectedProfId by remember { mutableStateOf<Int?>(null) }
+    var selectedProfId by remember { mutableStateOf<String?>(null) }
     var userBookerName by remember { mutableStateOf("Gaber") }
     var bookingAlertMessage by remember { mutableStateOf<String?>(null) }
     var isBookingSlotSelected by remember { mutableStateOf<BookingSlot?>(null) }
@@ -829,9 +829,9 @@ fun GuidesTabContent(viewModel: JournalViewModel) {
                             // Overlay Interactive Pin Coordinates on top of the system
                             // Map coordinates: relative offsets from center
                             val pins = listOf(
-                                Triple(1, "Ananda", Pair((-45).dp, (-50).dp)), // 0.8 mi
-                                Triple(2, "Somi", Pair((65).dp, (40).dp)),     // 1.5 mi
-                                Triple(3, "David", Pair((-80).dp, (45).dp))    // 2.3 mi
+                                Triple("1", "Ananda", Pair((-45).dp, (-50).dp)), // 0.8 mi
+                                Triple("2", "Somi", Pair((65).dp, (40).dp)),     // 1.5 mi
+                                Triple("3", "David", Pair((-80).dp, (45).dp))    // 2.3 mi
                             )
 
                             pins.forEach { (id, name, offset) ->
@@ -852,8 +852,8 @@ fun GuidesTabContent(viewModel: JournalViewModel) {
                                 ) {
                                     Text(
                                         text = when(id) {
-                                            1 -> "🧘‍♂️"
-                                            2 -> "🍃"
+                                            "1" -> "🧘‍♂️"
+                                            "2" -> "🍃"
                                             else -> "✨"
                                         },
                                         fontSize = 11.sp

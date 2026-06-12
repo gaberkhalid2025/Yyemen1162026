@@ -2,25 +2,61 @@ package com.example.data.repository
 
 import com.example.BuildConfig
 import com.example.data.database.JournalDao
-import com.example.data.database.ProfessionalDao
-import com.example.data.database.BookingSlotDao
 import com.example.data.entity.JournalEntry
 import com.example.data.entity.Professional
 import com.example.data.entity.BookingSlot
 import com.example.data.gemini.*
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 class JournalRepository(
-    private val journalDao: JournalDao,
-    private val professionalDao: ProfessionalDao,
-    private val bookingSlotDao: BookingSlotDao
+    private val journalDao: JournalDao
 ) {
 
     val allEntries: Flow<List<JournalEntry>> = journalDao.getAllEntries()
-    val allProfessionals: Flow<List<Professional>> = professionalDao.getAllProfessionals()
-    val allSlots: Flow<List<BookingSlot>> = bookingSlotDao.getAllSlots()
+
+    // Real-time Firestore snapshot listener for Professionals
+    val allProfessionals: Flow<List<Professional>> = callbackFlow {
+        val db = FirebaseFirestore.getInstance()
+        val listenerRegistration = db.collection("professionals")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    val list = snapshot.documents.mapNotNull { doc ->
+                        doc.toObject(Professional::class.java)?.copy(id = doc.id)
+                    }
+                    trySend(list)
+                }
+            }
+        awaitClose { listenerRegistration.remove() }
+    }
+
+    // Real-time Firestore snapshot listener for Booking Slots
+    val allSlots: Flow<List<BookingSlot>> = callbackFlow {
+        val db = FirebaseFirestore.getInstance()
+        val listenerRegistration = db.collection("booking_slots")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    val list = snapshot.documents.mapNotNull { doc ->
+                        doc.toObject(BookingSlot::class.java)?.copy(id = doc.id)
+                    }
+                    trySend(list)
+                }
+            }
+        awaitClose { listenerRegistration.remove() }
+    }
 
     suspend fun insert(entry: JournalEntry) = withContext(Dispatchers.IO) {
         journalDao.insertEntry(entry)
@@ -38,30 +74,53 @@ class JournalRepository(
         journalDao.deleteEntryById(id)
     }
 
-    // Professional access methods
+    // Professional Firestore access methods
     suspend fun insertAllProfessionals(professionals: List<Professional>) = withContext(Dispatchers.IO) {
-        professionalDao.insertAll(professionals)
+        val db = FirebaseFirestore.getInstance()
+        for (prof in professionals) {
+            val docRef = if (prof.id.isEmpty()) {
+                db.collection("professionals").document()
+            } else {
+                db.collection("professionals").document(prof.id)
+            }
+            docRef.set(prof.copy(id = docRef.id)).await()
+        }
     }
 
     suspend fun insertProfessional(professional: Professional) = withContext(Dispatchers.IO) {
-        professionalDao.insert(professional)
+        val db = FirebaseFirestore.getInstance()
+        val docRef = if (professional.id.isEmpty()) {
+            db.collection("professionals").document()
+        } else {
+            db.collection("professionals").document(professional.id)
+        }
+        docRef.set(professional.copy(id = docRef.id)).await()
     }
 
     suspend fun updateProfessional(professional: Professional) = withContext(Dispatchers.IO) {
-        professionalDao.update(professional)
+        val db = FirebaseFirestore.getInstance()
+        db.collection("professionals").document(professional.id).set(professional).await()
     }
 
-    // BookingSlot access methods
+    // BookingSlot Firestore access methods
     suspend fun insertSlot(slot: BookingSlot) = withContext(Dispatchers.IO) {
-        bookingSlotDao.insert(slot)
+        val db = FirebaseFirestore.getInstance()
+        val docRef = if (slot.id.isEmpty()) {
+            db.collection("booking_slots").document()
+        } else {
+            db.collection("booking_slots").document(slot.id)
+        }
+        docRef.set(slot.copy(id = docRef.id)).await()
     }
 
     suspend fun updateSlot(slot: BookingSlot) = withContext(Dispatchers.IO) {
-        bookingSlotDao.update(slot)
+        val db = FirebaseFirestore.getInstance()
+        db.collection("booking_slots").document(slot.id).set(slot).await()
     }
 
-    suspend fun deleteSlotById(id: Int) = withContext(Dispatchers.IO) {
-        bookingSlotDao.deleteById(id)
+    suspend fun deleteSlotById(id: String) = withContext(Dispatchers.IO) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("booking_slots").document(id).delete().await()
     }
 
     /**
