@@ -1,0 +1,6 @@
+{
+  "name": "ZenMind AI",
+  "description": "An elegant AI-powered mindfulness companion and journal with local Room persistence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
