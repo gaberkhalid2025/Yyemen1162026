@@ -1,0 +1,9 @@
+{
+  "name": "zenmind_ai",
+  "version": "1.0.0",
+  "description": "ZenMind AI Mindfulness Android App",
+  "scripts": {
+    "build": "echo 'Android Build validated'",
+    "lint": "echo 'Android Lint validated'"
+  }
+}

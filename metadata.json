@@ -1,0 +1,6 @@
+{
+  "name": "الدليل الشامل لكل الخدمات",
+  "description": "الدليل الشامل اليمني المتكامل لكل الخدمات المهنية والحرفية مع المساعد الذكي والدردشة الفورية والخرائط التفاعلية ومزامنة فيسبوك الفورية.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

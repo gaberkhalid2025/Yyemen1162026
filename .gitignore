@@ -1,0 +1,27 @@
+# Modern Android .gitignore
+# -------------------------
+
+# Gradle files and intermediates
+.gradle/
+/build/
+app/build/
+
+# Local configuration (e.g. Android SDK path)
+local.properties
+
+# Log files
+*.log
+
+# IntelliJ IDEA / Android Studio files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Ensure app-debug.apk in root and .build-outputs is not blocked and is tracked
+!app-debug.apk
+!/.build-outputs/app-debug.apk
